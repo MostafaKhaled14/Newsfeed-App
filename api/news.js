@@ -1,4 +1,4 @@
-const ALLOWED_ORIGINS = ["https://MostafaKhaled14.github.io", "http://localhost:5173"];
+const ALLOWED_ORIGINS = ["https://mostafakhaled14.github.io", "http://localhost:5173"];
 
 const ALLOWED_CATEGORIES = ["general", "world", "nation", "business", "entertainment", "health", "science", "sports", "technology"];
 
