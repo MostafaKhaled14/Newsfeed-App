@@ -6,7 +6,7 @@ import NewsHeader from "./components/NewsHeader/NewsHeader";
 import NewsFeed from "./components/NewsFeed/NewsFeed";
 
 const PAGE_SIZE = 5;
-const NEWS_API_URL = import.meta.env.VITE_PROXY_URL || "https://newsfeed-app.vercel.app/api/news";
+const NEWS_API_URL = import.meta.env.VITE_PROXY_URL || "https://newsfeed-app-three.vercel.app/api/news";
 
 function App() {
   const [articles, setArticles] = useState([]);
