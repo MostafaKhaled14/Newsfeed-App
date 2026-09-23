@@ -6,17 +6,7 @@ import NewsHeader from "./components/NewsHeader/NewsHeader";
 import NewsFeed from "./components/NewsFeed/NewsFeed";
 
 const PAGE_SIZE = 5;
-const NEWS_API_URL = "https://newsapi.org/v2/top-headlines";
-
-const CATEGORIES = [
-  "general",
-  "business",
-  "entertainment",
-  "health",
-  "science",
-  "sports",
-  "technology",
-];
+const NEWS_API_URL = import.meta.env.VITE_PROXY_URL || "https://newsfeed-app.vercel.app/api/news";
 
 function App() {
   const [articles, setArticles] = useState([]);
@@ -34,11 +24,9 @@ function App() {
 
       try {
         const params = new URLSearchParams({
-          country: "us",
-          pageSize: String(PAGE_SIZE),
+          max: String(PAGE_SIZE),
           category,
           page: String(page),
-          apiKey: import.meta.env.VITE_NEWS_API_KEY,
         });
 
         if (query.trim()) {
@@ -49,26 +37,21 @@ function App() {
           signal: controller.signal,
         });
 
-        if (!response.ok) {
-          throw new Error(`Request failed with status ${response.status}.`);
-        }
-
         const data = await response.json();
 
-        if (data.status !== "ok") {
-          throw new Error(data.message || "Failed to load news articles.");
+        if (!response.ok) {
+          const message = Array.isArray(data.errors) ? data.errors.join(" ") : `Request failed with status ${response.status}.`;
+          throw new Error(message);
         }
 
-        const nextArticles = (data.articles ?? []).map(
-          ({ title, description, urlToImage: image, url, author, publishedAt }) => ({
-            title,
-            description,
-            image,
-            url,
-            author,
-            publishedAt,
-          })
-        );
+        const nextArticles = (data.articles ?? []).map(({ title, description, image, url, source, publishedAt }) => ({
+          title,
+          description,
+          image,
+          url,
+          author: source?.name,
+          publishedAt,
+        }));
 
         setArticles(nextArticles);
       } catch (requestError) {
@@ -119,11 +102,7 @@ function App() {
         backgroundColor: "#f5f5f5",
       }}
     >
-      <NewsHeader
-        category={category}
-        onCategoryChange={handleCategoryChange}
-        onSearchChange={handleSearchChange}
-      />
+      <NewsHeader category={category} onCategoryChange={handleCategoryChange} onSearchChange={handleSearchChange} />
 
       {error && (
         <Typography color="error" align="center" sx={{ px: 2, py: 2 }}>
@@ -131,29 +110,15 @@ function App() {
         </Typography>
       )}
 
-      {!error && (
-        <NewsFeed
-          articles={articles}
-          loading={loading}
-          pageSize={PAGE_SIZE}
-        />
-      )}
+      {!error && <NewsFeed articles={articles} loading={loading} pageSize={PAGE_SIZE} />}
 
       {!error && (
         <div className="pagination">
-          <Button
-            variant="contained"
-            onClick={handlePrevPage}
-            disabled={loading || page === 1}
-          >
+          <Button variant="contained" onClick={handlePrevPage} disabled={loading || page === 1}>
             Previous
           </Button>
 
-          <Button
-            variant="contained"
-            onClick={handleNextPage}
-            disabled={loading || articles.length < PAGE_SIZE}
-          >
+          <Button variant="contained" onClick={handleNextPage} disabled={loading || articles.length < PAGE_SIZE}>
             Next
           </Button>
         </div>
